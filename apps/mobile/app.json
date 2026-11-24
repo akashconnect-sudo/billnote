@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "BILLNOTE",
+    "slug": "billnote",
+    "version": "0.1.0",
+    "orientation": "default",
+    "scheme": "billnote",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.billnote.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "BILLNOTE uses the camera to scan barcodes and take photos of your items.",
+        "NSLocationWhenInUseUsageDescription": "BILLNOTE uses your location while you use the app to fill your GST state and for attendance only if you turn that on.",
+        "NSPhotoLibraryUsageDescription": "BILLNOTE needs photo access to pick item pictures and share bill PDFs.",
+        "NSBluetoothAlwaysUsageDescription": "BILLNOTE uses Bluetooth to print bills and labels on a wireless printer."
+      }
+    },
+    "android": {
+      "package": "com.billnote.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0B6E4F"
+      },
+      "permissions": [
+        "CAMERA",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "POST_NOTIFICATIONS",
+        "BLUETOOTH_SCAN",
+        "BLUETOOTH_CONNECT"
+      ]
+    },
+    "plugins": [],
+    "extra": {
+      "eas": {
+        "projectId": "replace-in-phase-9"
+      }
+    }
+  }
+}

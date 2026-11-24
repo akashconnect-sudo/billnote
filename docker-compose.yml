@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:18.7
+    container_name: billnote-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: billnote
+      POSTGRES_PASSWORD: billnote
+      POSTGRES_DB: billnote_control
+    ports:
+      - "5432:5432"
+    volumes:
+      - billnote_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U billnote -d billnote_control"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: billnote-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - billnote_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  billnote_pg_data:
+  billnote_redis_data:

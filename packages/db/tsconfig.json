@@ -1,0 +1,10 @@
+{
+  "extends": "@billnote/config/tsconfig/base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": ".",
+    "composite": true
+  },
+  "include": ["src/**/*.ts", "generated/control/**/*.ts"],
+  "exclude": ["src/**/*.test.ts"]
+}
