@@ -1,6 +1,12 @@
 FROM node:24-bookworm-slim AS deps
 WORKDIR /app
-RUN corepack enable
+ENV CI=1 \
+    NODE_OPTIONS=--max-old-space-size=768 \
+    PNPM_NETWORK_CONCURRENCY=1 \
+    npm_config_fetch_retries=5
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
+  && pnpm config set network-concurrency 1 \
+  && pnpm config set child-concurrency 1
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
 COPY packages ./packages
 COPY apps/api ./apps/api
@@ -8,8 +14,9 @@ RUN pnpm install --frozen-lockfile --filter @billnote/api...
 
 FROM node:24-bookworm-slim AS runner
 WORKDIR /app
-ENV NODE_ENV=production
-RUN corepack enable
+ENV NODE_ENV=production \
+    NODE_OPTIONS=--max-old-space-size=512
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 COPY --from=deps /app /app
 WORKDIR /app/apps/api
 EXPOSE 4000
