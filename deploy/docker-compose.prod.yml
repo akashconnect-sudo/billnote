@@ -61,13 +61,17 @@ services:
   duckdns:
     image: lscr.io/linuxserver/duckdns:latest
     restart: unless-stopped
+    env_file:
+      - ../.env
     environment:
       TZ: Asia/Kolkata
       SUBDOMAINS: ${DUCKDNS_DOMAIN:-notebill}
-      TOKEN: ${DUCKDNS_TOKEN:?set DUCKDNS_TOKEN}
+      # Host-side: pass --env-file .env when running compose from /opt/billnote
+      TOKEN: ${DUCKDNS_TOKEN}
       UPDATE_IP: ipv4
     profiles:
       - duckdns
+
 
 volumes:
   redis_data:
