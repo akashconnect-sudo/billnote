@@ -2,9 +2,9 @@
   "extends": "@billnote/config/tsconfig/base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": ".",
+    "rootDir": "src",
     "composite": true
   },
-  "include": ["src/**/*.ts", "generated/control/**/*.ts"],
+  "include": ["src/**/*.ts"],
   "exclude": ["src/**/*.test.ts"]
 }

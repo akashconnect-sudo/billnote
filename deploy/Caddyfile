@@ -1,0 +1,23 @@
+{$DUCKDNS_DOMAIN}.duckdns.org {
+	encode gzip
+
+	handle /api* {
+		reverse_proxy api:4000
+	}
+
+	handle /health* {
+		reverse_proxy api:4000
+	}
+
+	handle /docs* {
+		reverse_proxy api:4000
+	}
+
+	handle /app/version {
+		reverse_proxy api:4000
+	}
+
+	handle {
+		reverse_proxy web:3000
+	}
+}

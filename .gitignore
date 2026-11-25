@@ -9,6 +9,7 @@ coverage
 .env
 .env.*
 !.env.example
+!deploy/.env.production.example
 .DS_Store
 Thumbs.db
 *.local
@@ -22,3 +23,5 @@ apps/mobile/ios
 *.tsbuildinfo
 .vscode/*
 !.vscode/extensions.json
+.history/
+.github/workflows/

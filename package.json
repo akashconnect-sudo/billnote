@@ -14,13 +14,15 @@
     "test": "turbo run test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "db:generate": "pnpm --filter @billnote/db prisma:generate",
-    "db:migrate": "pnpm --filter @billnote/db prisma:migrate:dev",
-    "db:push": "pnpm --filter @billnote/db db:push",
+    "db:ensure-table": "pnpm --filter @billnote/db ddb:ensure-table",
+    "smoke:ddb": "tsx scripts/smoke-ddb.ts",
     "help:missing": "pnpm --filter @billnote/shared exec vitest run src/help/missing-ids.test.ts"
   },
   "devDependencies": {
+    "dotenv": "^17.2.3",
+    "dynalite": "^4.0.0",
     "prettier": "^3.6.2",
+    "tsx": "^4.20.6",
     "turbo": "^2.5.8",
     "typescript": "^5.9.3"
   }

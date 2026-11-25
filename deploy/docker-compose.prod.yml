@@ -1,0 +1,75 @@
+services:
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.api
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      NODE_ENV: production
+      API_HOST: 0.0.0.0
+      API_PORT: 4000
+      REDIS_URL: redis://redis:6379
+      WEB_ORIGIN: https://${DUCKDNS_DOMAIN:-notebill}.duckdns.org
+      AWS_REGION: ${AWS_REGION:-ap-south-1}
+      DDB_TABLE: ${DDB_TABLE:-billnote}
+      DDB_ENDPOINT: ""
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.web
+      args:
+        NEXT_PUBLIC_API_URL: https://${DUCKDNS_DOMAIN:-notebill}.duckdns.org
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+    depends_on:
+      - api
+
+  caddy:
+    image: caddy:2.9-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DUCKDNS_DOMAIN: ${DUCKDNS_DOMAIN:-notebill}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+      - api
+
+  duckdns:
+    image: lscr.io/linuxserver/duckdns:latest
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Kolkata
+      SUBDOMAINS: ${DUCKDNS_DOMAIN:-notebill}
+      TOKEN: ${DUCKDNS_TOKEN:?set DUCKDNS_TOKEN}
+      UPDATE_IP: ipv4
+    profiles:
+      - duckdns
+
+volumes:
+  redis_data:
+  caddy_data:
+  caddy_config:

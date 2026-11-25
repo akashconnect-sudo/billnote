@@ -14,12 +14,22 @@ export async function api<T>(
   if (init.token) headers.set('Authorization', `Bearer ${init.token}`)
   headers.set('X-Billnote-Request', '1')
 
-  const response = await fetch(`${API_BASE}${path}`, {
-    ...init,
-    headers,
-    credentials: 'include',
-  })
-  return (await response.json()) as ApiResult<T>
+  try {
+    const response = await fetch(`${API_BASE}${path}`, {
+      ...init,
+      headers,
+      credentials: 'include',
+    })
+    return (await response.json()) as ApiResult<T>
+  } catch {
+    return {
+      data: null,
+      error: {
+        code: 'NETWORK_ERROR',
+        message: 'Cannot reach the server. Make sure the API is running on port 4000.',
+      },
+    }
+  }
 }
 
 export { API_BASE }

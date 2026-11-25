@@ -1,22 +1,4 @@
 services:
-  postgres:
-    image: postgres:18.7
-    container_name: billnote-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: billnote
-      POSTGRES_PASSWORD: billnote
-      POSTGRES_DB: billnote_control
-    ports:
-      - "5432:5432"
-    volumes:
-      - billnote_pg_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U billnote -d billnote_control"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   redis:
     image: redis:7.4-alpine
     container_name: billnote-redis
@@ -31,6 +13,18 @@ services:
       timeout: 3s
       retries: 10
 
+  dynamodb:
+    image: amazon/dynamodb-local:2.5.2
+    container_name: billnote-dynamodb
+    restart: unless-stopped
+    command: "-jar DynamoDBLocal.jar -sharedDb -inMemory"
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:8000/shell/ || exit 0"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
 volumes:
-  billnote_pg_data:
   billnote_redis_data:

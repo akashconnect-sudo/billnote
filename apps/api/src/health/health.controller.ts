@@ -1,6 +1,6 @@
 import { Controller, Get, Inject, ServiceUnavailableException } from '@nestjs/common'
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
-import { getControlDb } from '@billnote/db'
+import { pingDynamo } from '@billnote/db'
 import { fail, ok } from '../common/envelope.js'
 import { RedisService } from '../redis/redis.service.js'
 
@@ -18,15 +18,14 @@ export class HealthController {
 
   @Get('health/ready')
   @ApiOperation({ summary: 'Readiness probe' })
-  @ApiOkResponse({ description: 'Postgres and Redis reachable' })
+  @ApiOkResponse({ description: 'DynamoDB and Redis reachable' })
   async ready() {
     const checks: Record<string, string> = {}
 
     try {
-      await getControlDb().$queryRaw`SELECT 1`
-      checks.postgres = 'ok'
+      checks.dynamodb = (await pingDynamo()) ? 'ok' : 'down'
     } catch {
-      checks.postgres = 'down'
+      checks.dynamodb = 'down'
     }
 
     try {
@@ -35,10 +34,10 @@ export class HealthController {
       checks.redis = 'down'
     }
 
-    if (checks.postgres !== 'ok' || checks.redis !== 'ok') {
+    if (checks.dynamodb !== 'ok' || checks.redis !== 'ok') {
       throw new ServiceUnavailableException(
-        fail('NOT_READY', 'Postgres or Redis is not reachable.', [
-          { path: 'postgres', message: checks.postgres ?? 'unknown' },
+        fail('NOT_READY', 'DynamoDB or Redis is not reachable.', [
+          { path: 'dynamodb', message: checks.dynamodb ?? 'unknown' },
           { path: 'redis', message: checks.redis ?? 'unknown' },
         ]),
       )

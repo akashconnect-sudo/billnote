@@ -113,7 +113,7 @@ export class AuthController {
   @UseGuards(AuthGuard)
   async logout(@Req() req: AuthedRequest, @Res({ passthrough: true }) res: Response) {
     if (req.auth?.sid) {
-      await this.auth.logout(req.auth.sid)
+      await this.auth.logout(req.auth.sid, req.auth.sub)
     }
     res.clearCookie('__Host-bn_refresh', { path: '/api/v1/auth' })
     return { data: { loggedOut: true }, meta: { requestId: null }, error: null }

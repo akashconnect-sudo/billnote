@@ -1,0 +1,22 @@
+FROM node:24-bookworm-slim AS deps
+WORKDIR /app
+RUN corepack enable
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY packages ./packages
+COPY apps/web ./apps/web
+RUN pnpm install --frozen-lockfile --filter @billnote/web...
+
+FROM deps AS build
+ARG NEXT_PUBLIC_API_URL=https://notebill.duckdns.org
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+WORKDIR /app
+RUN pnpm --filter @billnote/web build
+
+FROM node:24-bookworm-slim AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+RUN corepack enable
+COPY --from=build /app /app
+WORKDIR /app/apps/web
+EXPOSE 3000
+CMD ["pnpm", "exec", "next", "start", "-H", "0.0.0.0", "-p", "3000"]
