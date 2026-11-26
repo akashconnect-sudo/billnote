@@ -1,4 +1,4 @@
-const CACHE = 'billnote-shell-v2'
+const CACHE = 'billnote-shell-v3'
 const SHELL = ['/', '/offline.html', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png']
 
 self.addEventListener('install', (event) => {

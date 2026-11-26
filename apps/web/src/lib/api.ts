@@ -1,7 +1,15 @@
-// Empty string = same origin (Caddy proxies /api → Nest). Local dev hits :4000.
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL ??
-  (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:4000')
+function resolveApiBase(): string {
+  // Browser on the live domain must never call localhost — use same origin (Caddy → API).
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname
+    if (host && host !== 'localhost' && host !== '127.0.0.1') {
+      return ''
+    }
+  }
+  if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL
+  if (process.env.NODE_ENV === 'production') return ''
+  return 'http://localhost:4000'
+}
 
 export type ApiResult<T> = {
   data: T | null
@@ -18,7 +26,7 @@ export async function api<T>(
   headers.set('X-Billnote-Request', '1')
 
   try {
-    const response = await fetch(`${API_BASE}${path}`, {
+    const response = await fetch(`${resolveApiBase()}${path}`, {
       ...init,
       headers,
       credentials: 'include',
@@ -35,4 +43,4 @@ export async function api<T>(
   }
 }
 
-export { API_BASE }
+export const API_BASE = resolveApiBase()
