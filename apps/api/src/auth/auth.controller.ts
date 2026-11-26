@@ -13,6 +13,7 @@ import { z } from 'zod'
 import { fail } from '../common/envelope.js'
 import { AuthGuard, type AuthedRequest } from './auth.guard.js'
 import { AuthService } from './auth.service.js'
+import { OtpService } from './otp.service.js'
 
 const signupSchema = z
   .object({
@@ -39,10 +40,32 @@ const refreshSchema = z.object({
   refreshToken: z.string().min(20).optional(),
 })
 
+const otpRequestSchema = z.object({
+  email: z.string().email(),
+  purpose: z.enum(['login', 'signup']),
+})
+
+const otpLoginSchema = z.object({
+  email: z.string().email(),
+  code: z.string().min(4).max(8),
+  platform: z.enum(['web', 'android', 'ios', 'windows', 'macos', 'linux']).optional(),
+})
+
+const otpSignupSchema = z.object({
+  fullName: z.string().min(2).max(120),
+  email: z.string().email(),
+  password: z.string().min(8).max(128),
+  code: z.string().min(4).max(8),
+  platform: z.enum(['web', 'android', 'ios', 'windows', 'macos', 'linux']).optional(),
+})
+
 @ApiTags('auth')
 @Controller('api/v1/auth')
 export class AuthController {
-  constructor(@Inject(AuthService) private readonly auth: AuthService) {}
+  constructor(
+    @Inject(AuthService) private readonly auth: AuthService,
+    @Inject(OtpService) private readonly otp: OtpService,
+  ) {}
 
   @Post('signup')
   async signup(
@@ -53,7 +76,10 @@ export class AuthController {
     const parsed = signupSchema.safeParse(body)
     if (!parsed.success) {
       return fail('VALIDATION', 'Check the form and try again.', [
-        { path: parsed.error.issues[0]?.path.join('.') ?? 'body', message: parsed.error.issues[0]?.message ?? 'Invalid' },
+        {
+          path: parsed.error.issues[0]?.path.join('.') ?? 'body',
+          message: parsed.error.issues[0]?.message ?? 'Invalid',
+        },
       ])
     }
     const result = await this.auth.signup({
@@ -76,6 +102,62 @@ export class AuthController {
       return fail('VALIDATION', 'Enter your email/phone and password.')
     }
     const result = await this.auth.login({
+      ...parsed.data,
+      userAgent: req.headers['user-agent'],
+      ip: req.ip,
+    })
+    this.setRefreshCookie(res, result.data.refreshToken)
+    return result
+  }
+
+  @Post('otp/request')
+  async requestOtp(@Body() body: unknown, @Req() req: AuthedRequest) {
+    const parsed = otpRequestSchema.safeParse(body)
+    if (!parsed.success) {
+      return fail('VALIDATION', 'Enter a valid email address.')
+    }
+    return this.otp.request({
+      email: parsed.data.email,
+      purpose: parsed.data.purpose,
+      ip: req.ip,
+    })
+  }
+
+  @Post('otp/verify-login')
+  async verifyOtpLogin(
+    @Body() body: unknown,
+    @Req() req: AuthedRequest,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const parsed = otpLoginSchema.safeParse(body)
+    if (!parsed.success) {
+      return fail('VALIDATION', 'Enter your email and the 6-digit OTP.')
+    }
+    const result = await this.otp.verifyLogin({
+      ...parsed.data,
+      userAgent: req.headers['user-agent'],
+      ip: req.ip,
+    })
+    this.setRefreshCookie(res, result.data.refreshToken)
+    return result
+  }
+
+  @Post('otp/verify-signup')
+  async verifyOtpSignup(
+    @Body() body: unknown,
+    @Req() req: AuthedRequest,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const parsed = otpSignupSchema.safeParse(body)
+    if (!parsed.success) {
+      return fail('VALIDATION', 'Check your details and OTP, then try again.', [
+        {
+          path: parsed.error.issues[0]?.path.join('.') ?? 'body',
+          message: parsed.error.issues[0]?.message ?? 'Invalid',
+        },
+      ])
+    }
+    const result = await this.otp.verifySignup({
       ...parsed.data,
       userAgent: req.headers['user-agent'],
       ip: req.ip,

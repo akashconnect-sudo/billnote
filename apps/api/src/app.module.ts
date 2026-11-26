@@ -4,6 +4,7 @@ import { BusinessesModule } from './businesses/businesses.module.js'
 import { DashboardModule } from './dashboard/dashboard.module.js'
 import { DocumentsModule } from './documents/documents.module.js'
 import { HealthController } from './health/health.controller.js'
+import { MailModule } from './mail/mail.module.js'
 import { PermissionsController } from './permissions/permissions.controller.js'
 import { ProductsModule } from './products/products.module.js'
 import { RedisModule } from './redis/redis.module.js'
@@ -12,6 +13,7 @@ import { VersionController } from './version/version.controller.js'
 @Module({
   imports: [
     RedisModule,
+    MailModule,
     AuthModule,
     BusinessesModule,
     ProductsModule,

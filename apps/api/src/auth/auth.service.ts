@@ -179,6 +179,25 @@ export class AuthService {
     })
   }
 
+  async completeOtpLogin(input: {
+    userId: string
+    platform?: string
+    userAgent?: string
+    ip?: string
+  }) {
+    const user = await users.getUserById(input.userId)
+    if (!user || user.status !== 'active' || user.deletedAt) {
+      throw new UnauthorizedException(fail('UNAUTHENTICATED', 'Please log in again.'))
+    }
+    const session = await this.createSession(user.id, input)
+    return ok({
+      user: this.publicUser(user),
+      accessToken: session.accessToken,
+      refreshToken: session.refreshToken,
+      expiresIn: 900,
+    })
+  }
+
   async logout(sessionId: string, userId?: string) {
     if (userId) {
       await sessions.revokeSessionById(userId, sessionId, 'logout')

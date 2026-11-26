@@ -21,6 +21,20 @@ const envSchema = z.object({
     .optional()
     .transform((value) => value === 'true'),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
+  EMAIL_PROVIDER: z.enum(['ses', 'smtp', 'console']).optional(),
+  EMAIL_FROM: z.string().optional(),
+  EMAIL_EXPOSE_OTP: z
+    .string()
+    .optional()
+    .transform((value) => value === 'true'),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().int().positive().optional(),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_SECURE: z
+    .string()
+    .optional()
+    .transform((value) => value === 'true'),
 })
 
 export type AppEnv = z.infer<typeof envSchema>

@@ -197,6 +197,35 @@ button:disabled {
   padding: 28px 24px;
 }
 
+.bn-auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin: 0 0 18px;
+  padding: 4px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--bn-line) 55%, transparent);
+}
+
+.bn-auth-tab {
+  appearance: none;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--bn-ink-soft);
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.bn-auth-tab.is-active {
+  background: var(--bn-card);
+  color: var(--bn-brand);
+  box-shadow: 0 1px 2px rgb(20 36 26 / 8%);
+}
+
 .bn-brand {
   margin: 0;
   font-family: var(--bn-font);
