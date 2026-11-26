@@ -18,8 +18,11 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
     NODE_OPTIONS=--max-old-space-size=768 \
     NEXT_TELEMETRY_DISABLED=1
 WORKDIR /app
-# Ensure workspace packages resolve (src exports + transpilePackages)
-RUN pnpm --filter @billnote/web build
+# Stale tsbuildinfo without dist makes tsc no-op — always clean before emit
+RUN rm -f packages/shared/tsconfig.tsbuildinfo packages/ui/tsconfig.tsbuildinfo \
+  && pnpm --filter @billnote/shared build \
+  && pnpm --filter @billnote/ui build \
+  && pnpm --filter @billnote/web exec next build --webpack
 
 FROM node:24-bookworm-slim AS runner
 WORKDIR /app
