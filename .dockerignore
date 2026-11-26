@@ -13,7 +13,6 @@
 !.env.example
 apps/mobile
 apps/desktop
-apps/api
 **/.git
 **/storybook-static
 
