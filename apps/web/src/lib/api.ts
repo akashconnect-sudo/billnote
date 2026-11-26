@@ -1,4 +1,7 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'
+// Empty string = same origin (Caddy proxies /api → Nest). Local dev hits :4000.
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL ??
+  (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:4000')
 
 export type ApiResult<T> = {
   data: T | null
@@ -26,7 +29,7 @@ export async function api<T>(
       data: null,
       error: {
         code: 'NETWORK_ERROR',
-        message: 'Cannot reach the server. Make sure the API is running on port 4000.',
+        message: 'Cannot reach the API. Check that the site/API containers are running.',
       },
     }
   }

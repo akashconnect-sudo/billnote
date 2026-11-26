@@ -35,7 +35,8 @@ services:
       context: ..
       dockerfile: deploy/Dockerfile.web
       args:
-        NEXT_PUBLIC_API_URL: https://${DUCKDNS_DOMAIN:-notebill}.duckdns.org
+        # Same-origin via Caddy (avoids localhost bake-in / CORS surprises)
+        NEXT_PUBLIC_API_URL: ""
     restart: unless-stopped
     environment:
       NODE_ENV: production

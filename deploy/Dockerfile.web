@@ -13,7 +13,8 @@ COPY apps/web ./apps/web
 RUN pnpm install --frozen-lockfile --filter @billnote/web...
 
 FROM deps AS build
-ARG NEXT_PUBLIC_API_URL=https://notebill.duckdns.org
+# Empty = browser calls same host; Caddy routes /api to Nest
+ARG NEXT_PUBLIC_API_URL=
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
     NODE_OPTIONS=--max-old-space-size=768 \
     NEXT_TELEMETRY_DISABLED=1
