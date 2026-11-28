@@ -27,13 +27,15 @@ git log -1 --oneline
 echo "==> Stopping web briefly to free RAM for build"
 "${COMPOSE[@]}" stop web || true
 
-echo "==> Building web (log: ${LOG})"
+echo "==> Building web (this takes 15-25 min on t3.micro — wait)"
+echo "    Live log also at: ${LOG}"
 # BuildKit can OOM hard on 1GB RAM — keep concurrency low
 export DOCKER_BUILDKIT=1
 export BUILDKIT_STEP_LOG_MAX_SIZE=10485760
 set +e
-"${COMPOSE[@]}" build web >"${LOG}" 2>&1
-CODE=$?
+# tee so nohup out AND log file both show progress (avoids "stuck" look)
+"${COMPOSE[@]}" build web 2>&1 | tee "${LOG}"
+CODE=${PIPESTATUS[0]}
 set -e
 
 if [[ "${CODE}" -ne 0 ]]; then
