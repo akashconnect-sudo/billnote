@@ -1,7 +1,7 @@
 FROM node:24-bookworm-slim AS deps
 WORKDIR /app
 ENV CI=1 \
-    NODE_OPTIONS=--max-old-space-size=768 \
+    NODE_OPTIONS=--max-old-space-size=512 \
     PNPM_NETWORK_CONCURRENCY=1 \
     npm_config_fetch_retries=5
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
@@ -16,7 +16,7 @@ FROM deps AS build
 # Empty = browser calls same host; Caddy routes /api to Nest
 ARG NEXT_PUBLIC_API_URL=
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
-    NODE_OPTIONS=--max-old-space-size=768 \
+    NODE_OPTIONS=--max-old-space-size=512 \
     NEXT_TELEMETRY_DISABLED=1
 WORKDIR /app
 # Stale tsbuildinfo without dist makes tsc no-op — always clean before emit
