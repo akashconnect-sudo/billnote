@@ -1,7 +1,7 @@
 FROM node:24-bookworm-slim AS deps
 WORKDIR /app
 ENV CI=1 \
-    NODE_OPTIONS=--max-old-space-size=768 \
+    NODE_OPTIONS=--max-old-space-size=512 \
     PNPM_NETWORK_CONCURRENCY=1 \
     npm_config_fetch_retries=5
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate \
@@ -12,12 +12,22 @@ COPY packages ./packages
 COPY apps/api ./apps/api
 RUN pnpm install --frozen-lockfile --filter @billnote/api...
 
+FROM deps AS build
+WORKDIR /app
+# Shared/config/db export dist — emit before API starts
+RUN rm -f packages/shared/tsconfig.tsbuildinfo \
+      packages/config/tsconfig.tsbuildinfo \
+      packages/db/tsconfig.tsbuildinfo \
+  && pnpm --filter @billnote/config build \
+  && pnpm --filter @billnote/shared build \
+  && pnpm --filter @billnote/db build
+
 FROM node:24-bookworm-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production \
     NODE_OPTIONS=--max-old-space-size=512
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
-COPY --from=deps /app /app
+COPY --from=build /app /app
 WORKDIR /app/apps/api
 EXPOSE 4000
 CMD ["pnpm", "exec", "tsx", "src/main.ts"]
